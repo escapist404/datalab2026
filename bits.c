@@ -19,7 +19,7 @@
  * Difficulty: 1
  */
 int bitAnd(int x, int y) {
-    return 2;
+    return ~(~x | ~y);
 }
 
 /*
@@ -30,7 +30,7 @@ int bitAnd(int x, int y) {
  *   Difficulty: 1
  */
 int bitXor(int x, int y) {
-    return 2;
+    return ~(x & y) & ~(~x & ~y);
 }
 
 /*
@@ -50,7 +50,16 @@ int bitXor(int x, int y) {
  *   1 if x and y have the same sign , 0 otherwise.
  */
 int samesign(int x, int y) {
-    return 2;
+    if (!x && !y) {
+        return 1;
+    }
+    if (!x) {
+        return 0;
+    }
+    if (!y) {
+        return 0;
+    }
+    return !(((x ^ y) >> 31) & 1);
 }
 
 /*
@@ -63,7 +72,20 @@ int samesign(int x, int y) {
  *   Difficulty: 4
  */
 int logtwo(int v) {
-    return 2;
+    int f16 = (v >> 16) > 0;
+    int s4 = f16 << 4;
+    v = v >> s4;
+    int f8 = (v >> 8) > 0;
+    int s3 = f8 << 3;
+    v = v >> s3;
+    int f4 = (v >> 4) > 0;
+    int s2 = f4 << 2;
+    v = v >> s2;
+    int f2 = (v >> 2) > 0;
+    int s1 = f2 << 1;
+    v = v >> s1;
+    int f1 = v >> 1;
+    return s4 | s3 | s2 | s1 | f1;
 }
 
 /*
@@ -76,7 +98,15 @@ int logtwo(int v) {
  *    Difficulty: 2
  */
 int byteSwap(int x, int n, int m) {
-    return 2;
+    int n2 = n << 3;
+    int m2 = m << 3;
+    int mask1 = 0xFF << n2;
+    int mask2 = 0xFF << m2;
+    int cbyte1 = x & mask1;
+    int cbyte2 = x & mask2;
+    int rbyte1 = ((cbyte1 >> n2) & 0xFF) << m2;
+    int rbyte2 = ((cbyte2 >> m2) & 0xFF) << n2;
+    return x ^ cbyte1 ^ cbyte2 ^ rbyte1 ^ rbyte2;
 }
 
 /*
