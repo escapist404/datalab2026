@@ -118,7 +118,30 @@ int byteSwap(int x, int n, int m) {
  *   Difficulty: 3
  */
 unsigned reverse(unsigned v) {
-    return 2;
+    unsigned l;
+    unsigned r;
+
+    l = 0xAAAAAAAA;
+    r = 0x55555555;
+    v = ((v & l) >> 1) | ((v & r) << 1);
+
+    l = 0xCCCCCCCC;
+    r = 0x33333333;
+    v = ((v & l) >> 2) | ((v & r) << 2);
+
+    l = 0xF0F0F0F0;
+    r = 0x0F0F0F0F;
+    v = ((v & l) >> 4) | ((v & r) << 4);
+
+    l = 0xFF00FF00;
+    r = 0x00FF00FF;
+    v = ((v & l) >> 8) | ((v & r) << 8);
+
+    l = 0xFFFF0000;
+    r = 0x0000FFFF;
+    v = ((v & l) >> 16) | ((v & r) << 16);
+
+    return v;
 }
 
 /*
@@ -130,7 +153,7 @@ unsigned reverse(unsigned v) {
  *   Difficulty: 3
  */
 int logicalShift(int x, int n) {
-    return 2;
+    return (x >> n) & ~((~0) << (32 + ~n) << 1);
 }
 
 /*
@@ -142,7 +165,34 @@ int logicalShift(int x, int n) {
  *   Difficulty: 4
  */
 int leftBitCount(int x) {
-    return 2;
+    int v = x;
+    v = v & (v >> 1);
+    v = v & (v >> 2);
+    v = v & (v >> 4);
+    v = v & (v >> 8);
+    v = v & (v >> 16);
+
+    int t = !!v;
+
+    int f16 = !!(v << 16);
+    int s4 = f16 << 4;
+    v = v << s4;
+
+    int f8 = !!(v << 8);
+    int s3 = f8 << 3;
+    v = v << s3;
+
+    int f4 = !!(v << 4);
+    int s2 = f4 << 2;
+    v = v << s2;
+
+    int f2 = !!(v << 2);
+    int s1 = f2 << 1;
+    v = v << s1;
+
+    int f1 = !!(v << 1);
+
+    return (s4 | s3 | s2 | s1 | f1) + t;
 }
 
 /*
