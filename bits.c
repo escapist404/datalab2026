@@ -203,8 +203,41 @@ int leftBitCount(int x) {
  *   Max ops: 30
  *   Difficulty: 4
  */
-unsigned float_i2f(int x) {
-    return 2;
+ unsigned float_i2f(int x) {
+    if (x == 0) {
+        return 0;
+    }
+
+    unsigned s = x & 0x80000000;
+    unsigned m = x, e = 158;
+
+    if (x < 0) {
+        m = ~x + 1;
+    }
+
+    while ((m & 0x80000000) == 0) {
+        m = m << 1;
+        e = e - 1;
+    }
+
+    int r = 0;
+    if ((m & 0xFF) > 0x80) {
+        r = 1;
+    } else if ((m & 0xFF) == 0x80) {
+        if (m & 0x100) {
+            r = 1;
+        }
+    }
+
+    if (r) {
+        unsigned o = m;
+        m = m + 0x100;
+        if (m < o) {
+            e = e + 1;
+        }
+    }
+
+    return s | (e << 23) | ((m >> 8) & 0x7FFFFF);
 }
 
 /*
@@ -219,7 +252,19 @@ unsigned float_i2f(int x) {
  *   Difficulty: 4
  */
 unsigned floatScale2(unsigned uf) {
-    return 2;
+    if ((uf & 0x7FFFFFFF) >= 0x7F800000) {
+        return uf;
+    }
+    
+    unsigned s = uf & 0x80000000;
+    unsigned e = uf & 0x7F800000;
+    unsigned m = uf & 0x7FFFFF;
+
+    if (e == 0) {
+        return s | (m << 1);
+    } else {
+        return s | (e + 0x800000) | m;
+    }
 }
 
 /*
@@ -236,7 +281,26 @@ unsigned floatScale2(unsigned uf) {
  *   Difficulty: 3
  */
 int float64_f2i(unsigned uf1, unsigned uf2) {
-    return 2;
+    unsigned s = uf2 >> 31;
+    unsigned e = (uf2 & 0x7FF00000) >> 20;
+
+    if (e < 1023) {
+        return 0;
+    }
+
+    if (e >= 1054) {
+        return 0x80000000;
+    }
+
+    unsigned intv = 0x80000000 | ((uf2 & 0xFFFFF) << 11) | (uf1 >> 12);
+    intv = intv >> (1054 - e);
+
+    int ret = intv;
+    if (s) {
+        ret = -ret;
+    }
+
+    return ret;
 }
 
 /*
@@ -253,5 +317,17 @@ int float64_f2i(unsigned uf1, unsigned uf2) {
  *   Difficulty: 4
  */
 unsigned floatPower2(int x) {
-    return 2;
+    if (x < -149) {
+        return 0;
+    }
+
+    if (x < -126) {
+        return 1 << (x + 149);
+    }
+
+    if (x < 128) {
+        return (x + 127) << 23;
+    }
+
+    return 0x7F800000;
 }
