@@ -50,16 +50,7 @@ int bitXor(int x, int y) {
  *   1 if x and y have the same sign , 0 otherwise.
  */
 int samesign(int x, int y) {
-    if (!x && !y) {
-        return 1;
-    }
-    if (!x) {
-        return 0;
-    }
-    if (!y) {
-        return 0;
-    }
-    return !(((x ^ y) >> 31) & 1);
+    return !((x ^ y) >> 31) && !(!x ^ !y);
 }
 
 /*
@@ -72,20 +63,24 @@ int samesign(int x, int y) {
  *   Difficulty: 4
  */
 int logtwo(int v) {
-    int f16 = (v >> 16) > 0;
-    int s4 = f16 << 4;
-    v = v >> s4;
-    int f8 = (v >> 8) > 0;
-    int s3 = f8 << 3;
-    v = v >> s3;
-    int f4 = (v >> 4) > 0;
-    int s2 = f4 << 2;
-    v = v >> s2;
-    int f2 = (v >> 2) > 0;
-    int s1 = f2 << 1;
-    v = v >> s1;
-    int f1 = v >> 1;
-    return s4 | s3 | s2 | s1 | f1;
+    int has16 = (v >> 16) > 0;
+    int shift16 = has16 << 4;
+    v = v >> shift16;
+
+    int has8 = (v >> 8) > 0;
+    int shift8 = has8 << 3;
+    v = v >> shift8;
+
+    int has4 = (v >> 4) > 0;
+    int shift4 = has4 << 2;
+    v = v >> shift4;
+
+    int has2 = (v >> 2) > 0;
+    int shift2 = has2 << 1;
+    v = v >> shift2;
+
+    int shift1 = v >> 1;
+    return shift16 | shift8 | shift4 | shift2 | shift1;
 }
 
 /*
@@ -98,15 +93,12 @@ int logtwo(int v) {
  *    Difficulty: 2
  */
 int byteSwap(int x, int n, int m) {
-    int n2 = n << 3;
-    int m2 = m << 3;
-    int mask1 = 0xFF << n2;
-    int mask2 = 0xFF << m2;
-    int cbyte1 = x & mask1;
-    int cbyte2 = x & mask2;
-    int rbyte1 = ((cbyte1 >> n2) & 0xFF) << m2;
-    int rbyte2 = ((cbyte2 >> m2) & 0xFF) << n2;
-    return x ^ cbyte1 ^ cbyte2 ^ rbyte1 ^ rbyte2;
+    int ns = n << 3;
+    int ms = m << 3;
+    int a = (x >> ns) & 0xFF;
+    int b = (x >> ms) & 0xFF;
+    int d = a ^ b;
+    return x ^ (d << ns) ^ (d << ms);
 }
 
 /*
@@ -118,29 +110,11 @@ int byteSwap(int x, int n, int m) {
  *   Difficulty: 3
  */
 unsigned reverse(unsigned v) {
-    unsigned l;
-    unsigned r;
-
-    l = 0xAAAAAAAA;
-    r = 0x55555555;
-    v = ((v & l) >> 1) | ((v & r) << 1);
-
-    l = 0xCCCCCCCC;
-    r = 0x33333333;
-    v = ((v & l) >> 2) | ((v & r) << 2);
-
-    l = 0xF0F0F0F0;
-    r = 0x0F0F0F0F;
-    v = ((v & l) >> 4) | ((v & r) << 4);
-
-    l = 0xFF00FF00;
-    r = 0x00FF00FF;
-    v = ((v & l) >> 8) | ((v & r) << 8);
-
-    l = 0xFFFF0000;
-    r = 0x0000FFFF;
-    v = ((v & l) >> 16) | ((v & r) << 16);
-
+    v = ((v & 0xAAAAAAAAU) >> 1) | ((v & 0x55555555U) << 1);
+    v = ((v & 0xCCCCCCCCU) >> 2) | ((v & 0x33333333U) << 2);
+    v = ((v & 0xF0F0F0F0U) >> 4) | ((v & 0x0F0F0F0FU) << 4);
+    v = ((v & 0xFF00FF00U) >> 8) | ((v & 0x00FF00FFU) << 8);
+    v = ((v & 0xFFFF0000U) >> 16) | ((v & 0x0000FFFFU) << 16);
     return v;
 }
 
@@ -172,27 +146,27 @@ int leftBitCount(int x) {
     v = v & (v >> 8);
     v = v & (v >> 16);
 
-    int t = !!v;
+    int count_all = !!v;
 
-    int f16 = !!(v << 16);
-    int s4 = f16 << 4;
-    v = v << s4;
+    int has16 = !!(v << 16);
+    int add16 = has16 << 4;
+    v = v << add16;
 
-    int f8 = !!(v << 8);
-    int s3 = f8 << 3;
-    v = v << s3;
+    int has8 = !!(v << 8);
+    int add8 = has8 << 3;
+    v = v << add8;
 
-    int f4 = !!(v << 4);
-    int s2 = f4 << 2;
-    v = v << s2;
+    int has4 = !!(v << 4);
+    int add4 = has4 << 2;
+    v = v << add4;
 
-    int f2 = !!(v << 2);
-    int s1 = f2 << 1;
-    v = v << s1;
+    int has2 = !!(v << 2);
+    int add2 = has2 << 1;
+    v = v << add2;
 
-    int f1 = !!(v << 1);
+    int add1 = !!(v << 1);
 
-    return (s4 | s3 | s2 | s1 | f1) + t;
+    return count_all + add1 + add2 + add4 + add8 + add16;
 }
 
 /*
@@ -292,7 +266,7 @@ int float64_f2i(unsigned uf1, unsigned uf2) {
         return 0x80000000;
     }
 
-    unsigned intv = 0x80000000 | ((uf2 & 0xFFFFF) << 11) | (uf1 >> 12);
+    unsigned intv = 0x80000000 | ((uf2 & 0xFFFFF) << 11) | (uf1 >> 21);
     intv = intv >> (1054 - e);
 
     int ret = intv;
