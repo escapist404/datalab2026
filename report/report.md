@@ -3,10 +3,21 @@
 * 姓名：熊洋铭
 * 学号：2025201731
 
-| 总分 | bitAnd | bitXor | samesign | logtwo | byteSwap | reverse | logicalShift | leftBitCount | float_i2f | floatScale2 | float64_f2i | floatPower2 |
-| ---- | ------ | ------ | -------- | ------- | -------- | ------- | ------------ | ------------- | ---------- | ------------ | ------------ | ------------ |
-| 37 | 1 | 1 | 2 | 4 | 4 | 3 | 3 | 4 | 4 | 4 | 3 | 4 |
-
+| 题目 | 分数 |
+| ---- | ------ |
+| bitAnd | 1 |
+| bitXor | 1 |
+| samesign | 2 |
+| logtwo | 4 |
+| byteSwap | 4 |
+| reverse | 3 |
+| logicalShift | 3 |
+| leftBitCount | 4 |
+| float_i2f | 4 |
+| floatScale2 | 4 |
+| float64_f2i | 3 |
+| floatPower2 | 4 |
+| ALL | 37 |
 
 test 截图：
 
